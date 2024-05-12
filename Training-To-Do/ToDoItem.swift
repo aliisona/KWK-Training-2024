@@ -6,9 +6,11 @@
 //
 
 import Foundation
+import SwiftData
 
+@Model
 //creating a class for the items
-class ToDoItem: Identifiable {
+class ToDoItem {
     var id = UUID()
     var title = ""
     var isImportant = false

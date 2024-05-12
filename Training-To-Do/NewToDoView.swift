@@ -6,47 +6,54 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct NewToDoView: View {
-    @State var title: String
-    @State var isImportant: Bool
-    @Binding var toDoItems: [ToDoItem]
-    @Binding var showNewTask : Bool
+    @Bindable var toDoItem: ToDoItem
+    @Environment(\.modelContext) var modelContext
+    @Binding var showNewTask: Bool
 
+
+    
     var body: some View {
         VStack{
             Text("Task title:")
                 .font(.title)
                 .fontWeight(.bold)
-            TextField("Enter the task description...", text:$title)
+            TextField("Enter the task description...", text: $toDoItem.title)
                 .padding()
                 .background(Color(.systemGroupedBackground))
                 .cornerRadius(14)
                 .padding()
-            Toggle(isOn: $isImportant) {
-                            Text("Is it important?")
-                }
-                .padding()
+            Toggle(isOn: $toDoItem.isImportant) {
+                Text("Is it important?")
+                    .padding()
+            }
             
-            Button(action: {
-                self.addTask(title: self.title, isImportant: self.isImportant)
+            Button {
+                addToDo()
                 self.showNewTask = false
 
-            }) {
-                Text("Add")
+            } label: {
+                    Text("Save")
             }
             .padding()
         }
     }
     
-    private func addTask(title: String, isImportant: Bool = false) {
-            
-            let task = ToDoItem(title: title, isImportant: isImportant)
-            toDoItems.append(task)
+    func addToDo() {
+        let toDo = ToDoItem(title: toDoItem.title, isImportant: toDoItem.isImportant)
+        modelContext.insert(toDo)
+
     }
     
 }
-
+//
 #Preview {
-    NewToDoView(title: "", isImportant: false, toDoItems: .constant([]), showNewTask: .constant(true))
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: ToDoItem.self, configurations: config)
+
+    let toDo = ToDoItem(title: "Example ToDo", isImportant: false)
+    return NewToDoView(toDoItem: toDo, showNewTask: .constant(true))
+        .modelContainer(container)
 }

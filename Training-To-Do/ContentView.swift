@@ -6,9 +6,12 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
-    @State var toDoItems: [ToDoItem] = []
+    @Query var toDos: [ToDoItem]
+    @Environment(\.modelContext) var modelContext
+
     @State private var showNewTask = false
     
     var body: some View {
@@ -31,27 +34,34 @@ struct ContentView: View {
             .padding()
             
             List {
-                ForEach (toDoItems) { toDoItem in
+                ForEach (toDos) { toDoItem in
                     if toDoItem.isImportant == true {
                         Text("‼️" + toDoItem.title)
                     } else {
                         Text(toDoItem.title)
                     }
-                }
+                    
+                }.onDelete(perform: deleteToDo)
+
             }
             
         
             if showNewTask {
-                NewToDoView(title: "", isImportant: false, toDoItems: $toDoItems, showNewTask: $showNewTask)
-                    .transition(AnyTransition.move(edge: .top).combined(with: .opacity).animation(.easeInOut(duration: 0.7)))
-
+                NewToDoView(toDoItem: ToDoItem(title: "", isImportant: false), showNewTask: $showNewTask)
             }
            
         }
     }
+    func deleteToDo(at offsets: IndexSet) {
+        for offset in offsets {
+            let toDoItem = toDos[offset]
+            modelContext.delete(toDoItem)
+        }
+    }
+    
 }
 
-#Preview {
-    
-    ContentView()
-}
+//#Preview {
+//    
+//    ContentView()
+//}
