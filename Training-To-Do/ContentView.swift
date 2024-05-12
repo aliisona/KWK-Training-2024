@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var toDoItems: [ToDoItem] = []
+    @FetchRequest(
+            entity: ToDo.entity(), sortDescriptors: [ NSSortDescriptor(keyPath: \ToDo.id, ascending: false) ])
+        
+    var toDoItems: FetchedResults<ToDo>
     @State private var showNewTask = false
     
     var body: some View {
@@ -33,16 +36,16 @@ struct ContentView: View {
             List {
                 ForEach (toDoItems) { toDoItem in
                     if toDoItem.isImportant == true {
-                        Text("‼️" + toDoItem.title)
+                        Text("‼️" + (toDoItem.title ?? "No title"))
                     } else {
-                        Text(toDoItem.title)
+                                        Text(toDoItem.title ?? "No title")
                     }
                 }
             }
             
         
             if showNewTask {
-                NewToDoView(title: "", isImportant: false, toDoItems: $toDoItems, showNewTask: $showNewTask)
+                NewToDoView(title: "", isImportant: false, showNewTask: $showNewTask)
                     .transition(AnyTransition.move(edge: .top).combined(with: .opacity).animation(.easeInOut(duration: 0.7)))
 
             }
@@ -52,6 +55,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    
     ContentView()
 }
